@@ -44,6 +44,7 @@ export function SocketTelemetry() {
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Realtime Telemetry</h3>
         <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">{connectionState}</span>
+        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">Live</span>
       </div>
 
       {!reading ? (
