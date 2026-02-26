@@ -48,17 +48,20 @@ corepack prepare pnpm@9.15.0 --activate
 
 ## 2) Fastest way to launch everything
 
-### Option A (recommended)
+### Option A (easiest)
 ```bash
-pnpm i
-pnpm dev
+make run
 ```
 
-`pnpm dev` starts Docker Compose (`postgres`, `redis`, `api`, `web`) with build.
+`make run` does first-time setup automatically (copies `.env` files if missing, installs deps) and then starts Docker Compose (`postgres`, `redis`, `api`, `web`).
 
-### Option B (Make)
+### Option B (manual)
 ```bash
-make dev
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+pnpm i
+pnpm dev
 ```
 
 ---
@@ -68,12 +71,13 @@ make dev
 From repository root:
 
 ```bash
-cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-pnpm i
-pnpm dev
+make run
 ```
+
+That single command will:
+1. create `.env`, `apps/api/.env`, and `apps/web/.env` from templates (if missing),
+2. install dependencies with `pnpm i`,
+3. start the full stack with Docker Compose.
 
 Then verify:
 
@@ -120,13 +124,16 @@ make build
 make e2e
 ```
 
-Docker utility:
+Simple lifecycle commands:
 
 ```bash
-make up
-make ps
-make logs
-make down
+make start      # start stack
+make stop       # stop stack
+make restart    # restart stack
+make status     # show running services
+make logs       # follow logs
+make doctor     # show local tool versions
+make help       # print all quick commands
 ```
 
 ---
