@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id              String                   @id @default(cuid())
+  email           String                   @unique
+  passwordHash    String
+  displayName     String
+  totpSecret      String?
+  createdAt       DateTime                 @default(now())
+  memberships     OrgMembership[]
+  notifications   Notification[]
+  audits          AuditLog[]               @relation("AuditActor")
+  invites         InviteToken[]            @relation("InviteCreator")
+  prefs           NotificationPreference?
+  refreshTokens   RefreshToken[]
+  passwordResets  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model NotificationPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  maintenanceEmail  Boolean  @default(true)
+  alertEmail        Boolean  @default(true)
+  telemetryEmail    Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model Organization {
+  id            String          @id @default(cuid())
+  name          String
+  createdAt     DateTime        @default(now())
+  memberships   OrgMembership[]
+  projects      Project[]
+  tanks         Tank[]
+  audits        AuditLog[]
+  taskTemplates TaskTemplate[]
+  invites       InviteToken[]
+}
+
+model OrgMembership {
+  id      String       @id @default(cuid())
+  userId  String
+  orgId   String
+  role    OrgRole
+  user    User         @relation(fields: [userId], references: [id])
+  org     Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+model Project {
+  id      String       @id @default(cuid())
+  orgId   String
+  name    String
+  org     Organization @relation(fields: [orgId], references: [id])
+}
+
+model Tank {
+  id             String               @id @default(cuid())
+  orgId          String
+  name           String
+  tankType       String
+  volumeGallons  Float
+  dimensions     String?
+  equipmentList  String?
+  saltType       String?
+  targetParams   Json?
+  createdAt      DateTime             @default(now())
+  org            Organization         @relation(fields: [orgId], references: [id])
+  livestock      Livestock[]
+  waterTests     WaterTest[]
+  dosingPlans    DosingPlan[]
+  dosingLogs     DosingLog[]
+  taskTemplates  TaskTemplate[]
+  telemetry      EquipmentTelemetry[]
+  events         LivestockEvent[]
+  uploadedPhotos UploadedPhoto[]
+}
+
+model UploadedPhoto {
+  id        String   @id @default(cuid())
+  tankId    String?
+  path      String
+  mimeType  String
+  createdAt DateTime @default(now())
+  tank      Tank?    @relation(fields: [tankId], references: [id])
+}
+
+model Livestock {
+  id             String   @id @default(cuid())
+  tankId         String
+  speciesName    String
+  kind           String
+  acquiredAt     DateTime
+  quarantineDays Int
+  status         String
+  tank           Tank     @relation(fields: [tankId], references: [id])
+}
+
+model LivestockEvent {
+  id          String   @id @default(cuid())
+  tankId       String
+  livestockId  String?
+  type        String
+  details     String
+  occurredAt  DateTime @default(now())
+  tank        Tank     @relation(fields: [tankId], references: [id])
+}
+
+model WaterTest {
+  id          String   @id @default(cuid())
+  tankId      String
+  testedAt    DateTime @default(now())
+  no3         Float
+  po4         Float
+  alk         Float
+  ca          Float?
+  mg          Float?
+  ph          Float?
+  salinity    Float?
+  temperature Float?
+  ammonia     Float?
+  nitrite     Float?
+  note        String?
+  tank        Tank     @relation(fields: [tankId], references: [id])
+}
+
+model TaskTemplate {
+  id        String       @id @default(cuid())
+  orgId     String
+  tankId    String
+  name      String
+  cronRule  String
+  createdAt DateTime     @default(now())
+  org       Organization @relation(fields: [orgId], references: [id])
+  tank      Tank         @relation(fields: [tankId], references: [id])
+}
+
+model DosingPlan {
+  id            String   @id @default(cuid())
+  tankId        String
+  additiveName  String
+  concentration Float
+  dailyDoseMl   Float
+  inventoryMl   Float
+  createdAt     DateTime @default(now())
+  tank          Tank     @relation(fields: [tankId], references: [id])
+}
+
+model DosingLog {
+  id         String   @id @default(cuid())
+  tankId      String
+  expectedMl Float
+  actualMl   Float
+  dosedAt    DateTime @default(now())
+  tank       Tank     @relation(fields: [tankId], references: [id])
+}
+
+model EquipmentTelemetry {
+  id          String   @id @default(cuid())
+  tankId      String
+  equipment   String
+  temperature Float?
+  powerDraw   Float?
+  state       String
+  capturedAt  DateTime @default(now())
+  tank        Tank     @relation(fields: [tankId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model InviteToken {
+  id         String       @id @default(cuid())
+  orgId      String
+  email      String
+  token      String       @unique
+  createdBy  String
+  acceptedAt DateTime?
+  createdAt  DateTime     @default(now())
+  org        Organization @relation(fields: [orgId], references: [id])
+  creator    User         @relation("InviteCreator", fields: [createdBy], references: [id])
+}
+
+model AuditLog {
+  id           String       @id @default(cuid())
+  orgId        String
+  actorId      String
+  action       String
+  resourceType String
+  resourceId   String
+  payload      Json
+  createdAt    DateTime     @default(now())
+  org          Organization @relation(fields: [orgId], references: [id])
+  actor        User         @relation("AuditActor", fields: [actorId], references: [id])
+}
+
+model SpeciesProfile {
+  id             String  @id @default(cuid())
+  commonName     String
+  scientificName String
+  kind           String
+  careLevel      String
+  compatibility  String
+  checklist      String?
+}
