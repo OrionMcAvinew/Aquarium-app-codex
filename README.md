@@ -237,6 +237,37 @@ If your environment blocks registry access:
 ### App starts but DB tables are missing
 Use API container startup logs; Prisma generate/migrate/seed are part of API startup command in Dockerfile.
 
+
+### `pnpm i` says `Invalid package.json`
+Most often this is one of these:
+- You're running from the wrong folder (not repo root).
+- Your local branch has unresolved merge markers (`<<<<<<<`, `=======`, `>>>>>>>`) in `package.json` or another JSON file.
+- Node/pnpm mismatch cached old lock metadata.
+
+Quick checks:
+```bash
+pwd
+node -v
+pnpm -v
+rg -n "^(<<<<<<<|=======|>>>>>>>)" package.json apps/**/package.json
+node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('root package.json ok')"
+```
+
+### Merge conflict question: current, incoming, or both?
+Short answer: **usually neither blindly**.
+- Use **both** only after manually merging line-by-line and removing conflict markers.
+- For `package.json` and lockfiles, prefer the version that preserves all required scripts/dependencies, then run install and tests.
+- If unsure in this repo, keep the simplified DX commands (`make run`, `make start`, `make stop`) and runtime constraints (`Node 20+`, `pnpm 9+`).
+
+Safe conflict workflow:
+```bash
+git status
+# open conflicted files and resolve manually
+rg -n "^(<<<<<<<|=======|>>>>>>>)" .
+git add <resolved-files>
+git commit
+```
+
 ### Mail/invite verification
 Check generated files under `./mailbox`.
 
