@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: reefops
+      POSTGRES_PASSWORD: reefops
+      POSTGRES_DB: reefops
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://reefops:reefops@postgres:5432/reefops?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: super-secret
+      JWT_REFRESH_SECRET: super-refresh-secret
+      PORT: 3001
+      NODE_ENV: development
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - ./mailbox:/app/mailbox
+      - ./uploads:/app/uploads
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '3001:3001'
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      PORT: 3000
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+    depends_on:
+      - api
+    ports:
+      - '3000:3000'
+volumes:
+  pgdata:
