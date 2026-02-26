@@ -6,6 +6,28 @@
   border-color: rgb(30 41 59 / 1);
 }
 
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 999px;
+}
 body {
   @apply bg-slate-950 text-slate-100 antialiased;
 }

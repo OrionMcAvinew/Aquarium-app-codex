@@ -11,6 +11,7 @@ ReefOps is a full-stack aquarium/fish management platform in a pnpm monorepo:
 
 Install locally:
 - Docker + Docker Compose
+- Node.js 20+ (required, see section 1.1)
 - Node.js 20+
 - pnpm 9+
 
@@ -19,6 +20,43 @@ Optional (if you use Make targets):
 
 ---
 
+## 1.1) Required runtime versions (important)
+
+ReefOps requires:
+- **Node.js 20+**
+- **pnpm 9+**
+
+If you see:
+`ERROR: This version of pnpm requires at least Node.js v18.12 (current v16.x)`
+then upgrade Node first, then enable pnpm via Corepack:
+
+```bash
+nvm install 20
+nvm use 20
+corepack enable
+corepack prepare pnpm@9.15.0 --activate
+pnpm -v
+```
+
+Alternative with fnm:
+
+```bash
+fnm install 20
+fnm use 20
+corepack enable
+corepack prepare pnpm@9.15.0 --activate
+```
+
+## 2) Fastest way to launch everything
+
+### Option A (easiest)
+```bash
+make run
+```
+
+`make run` does first-time setup automatically (copies `.env` files if missing, installs deps) and then starts Docker Compose (`postgres`, `redis`, `api`, `web`).
+
+### Option B (manual)
 ## 2) Fastest way to launch everything
 
 ### Option A (recommended)
@@ -47,6 +85,21 @@ cp apps/web/.env.example apps/web/.env
 pnpm i
 pnpm dev
 ```
+
+---
+
+## 3) First-time startup (exact sequence)
+
+From repository root:
+
+```bash
+make run
+```
+
+That single command will:
+1. create `.env`, `apps/api/.env`, and `apps/web/.env` from templates (if missing),
+2. install dependencies with `pnpm i`,
+3. start the full stack with Docker Compose.
 
 Then verify:
 
@@ -93,6 +146,16 @@ make build
 make e2e
 ```
 
+Simple lifecycle commands:
+
+```bash
+make start      # start stack
+make stop       # stop stack
+make restart    # restart stack
+make status     # show running services
+make logs       # follow logs
+make doctor     # show local tool versions
+make help       # print all quick commands
 Docker utility:
 
 ```bash

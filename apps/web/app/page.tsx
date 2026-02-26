@@ -3,6 +3,8 @@ import { SocketTelemetry } from '../components/socket-telemetry';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001';
 
+type Tank = { id: string; name: string; volumeGallons: number; tankType: string };
+type TanksResponse = { data?: Tank[] };
 type TanksResponse = { data?: Array<{ id: string; name: string; volumeGallons: number; tankType: string }> };
 type StockingRiskResponse = { riskScore?: number; explanations?: string[] };
 
@@ -17,6 +19,9 @@ async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
 }
 
 async function getTanks() {
+  return safeFetchJson<TanksResponse>('/v1/tanks?orgId=demo-org&page=1&pageSize=10&sortBy=createdAt&sortOrder=desc', {
+    data: [],
+  });
   return safeFetchJson<TanksResponse>(
     '/v1/tanks?orgId=demo-org&page=1&pageSize=10&sortBy=createdAt&sortOrder=desc',
     { data: [] },
@@ -33,6 +38,8 @@ async function getStockingRisk() {
 export default async function Page() {
   const [tanksResult, risk] = await Promise.all([getTanks(), getStockingRisk()]);
   const tanks = tanksResult.data ?? [];
+  const riskScore = risk.riskScore ?? 0;
+
   const chartData = [
     { date: 'Mon', no3: 8, po4: 0.08 },
     { date: 'Tue', no3: 9, po4: 0.1 },
@@ -82,6 +89,41 @@ export default async function Page() {
       </section>
 
       <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <h3 className="mb-2 text-lg font-semibold">Tank Inventory</h3>
+        <div className="overflow-hidden rounded-xl border border-slate-800">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-900/90 text-slate-400">
+              <tr>
+                <th className="px-3 py-2">Tank</th>
+                <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2">Volume</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tanks.length ? (
+                tanks.map((tank) => (
+                  <tr key={tank.id} className="border-t border-slate-800/90">
+                    <td className="px-3 py-2">{tank.name}</td>
+                    <td className="px-3 py-2">{tank.tankType}</td>
+                    <td className="px-3 py-2">{tank.volumeGallons} gal</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-3 py-3 text-slate-400" colSpan={3}>
+                    No tank records returned.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <h3 className="mb-2 text-lg font-semibold">Stocking Risk Explanations</h3>
+        <ul className="space-y-2 text-sm text-slate-300">
+          {(risk.explanations ?? []).map((item) => (
         <h3 className="mb-2 text-lg font-semibold">Stocking Risk Explanations</h3>
         <ul className="space-y-2 text-sm text-slate-300">
           {(risk.explanations ?? []).map((item: string) => (

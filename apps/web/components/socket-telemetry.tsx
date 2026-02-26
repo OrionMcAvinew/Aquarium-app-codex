@@ -24,12 +24,15 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001';
 export function SocketTelemetry() {
   const [reading, setReading] = useState<Reading | null>(null);
   const [alert, setAlert] = useState<AlertPayload | null>(null);
+  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
 
   useEffect(() => {
     const socket = io(`${apiBaseUrl}/telemetry`, {
       transports: ['websocket'],
     });
 
+    socket.on('connect', () => setConnectionState('connected'));
+    socket.on('disconnect', () => setConnectionState('disconnected'));
     socket.on('telemetry', (payload: Reading) => setReading(payload));
     socket.on('telemetry-alert', (payload: AlertPayload) => setAlert(payload));
 
@@ -40,6 +43,7 @@ export function SocketTelemetry() {
     <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-cyan-900/10">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Realtime Telemetry</h3>
+        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">{connectionState}</span>
         <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">Live</span>
       </div>
 
