@@ -12,6 +12,8 @@
     "prepare": "husky",
     "check:runtime": "node -e \"const major=parseInt(process.versions.node.split('.')[0],10); if(major<20){console.error('ReefOps requires Node.js >= 20. Current: '+process.version); process.exit(1)}\"",
     "preinstall": "node -e \"const major=parseInt(process.versions.node.split('.')[0],10); if(major<20){console.error('ReefOps requires Node.js >= 20. Current: '+process.version); process.exit(1)}\""
+    "preinstall": "pnpm run check:runtime"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",

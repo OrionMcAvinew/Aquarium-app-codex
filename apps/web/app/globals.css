@@ -28,3 +28,6 @@ body {
   background: #1e293b;
   border-radius: 999px;
 }
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}

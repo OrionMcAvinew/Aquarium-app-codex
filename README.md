@@ -12,6 +12,7 @@ ReefOps is a full-stack aquarium/fish management platform in a pnpm monorepo:
 Install locally:
 - Docker + Docker Compose
 - Node.js 20+ (required, see section 1.1)
+- Node.js 20+
 - pnpm 9+
 
 Optional (if you use Make targets):
@@ -56,6 +57,27 @@ make run
 `make run` does first-time setup automatically (copies `.env` files if missing, installs deps) and then starts Docker Compose (`postgres`, `redis`, `api`, `web`).
 
 ### Option B (manual)
+## 2) Fastest way to launch everything
+
+### Option A (recommended)
+```bash
+pnpm i
+pnpm dev
+```
+
+`pnpm dev` starts Docker Compose (`postgres`, `redis`, `api`, `web`) with build.
+
+### Option B (Make)
+```bash
+make dev
+```
+
+---
+
+## 3) First-time startup (exact sequence)
+
+From repository root:
+
 ```bash
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
@@ -134,6 +156,13 @@ make status     # show running services
 make logs       # follow logs
 make doctor     # show local tool versions
 make help       # print all quick commands
+Docker utility:
+
+```bash
+make up
+make ps
+make logs
+make down
 ```
 
 ---

@@ -25,6 +25,10 @@ start:
 	docker compose up --build
 
 dev: start
+.PHONY: dev up down logs ps lint test build e2e
+
+dev:
+	docker compose up --build
 
 up:
 	docker compose up -d --build
@@ -49,6 +53,14 @@ doctor:
 	@echo "pnpm: $$(pnpm -v 2>/dev/null || echo 'not installed')"
 	@echo "docker: $$(docker --version 2>/dev/null || echo 'not installed')"
 	@echo "docker compose: $$(docker compose version 2>/dev/null || echo 'not installed')"
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f --tail=150
+
+ps:
+	docker compose ps
 
 lint:
 	pnpm lint

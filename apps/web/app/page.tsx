@@ -5,6 +5,7 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001';
 
 type Tank = { id: string; name: string; volumeGallons: number; tankType: string };
 type TanksResponse = { data?: Tank[] };
+type TanksResponse = { data?: Array<{ id: string; name: string; volumeGallons: number; tankType: string }> };
 type StockingRiskResponse = { riskScore?: number; explanations?: string[] };
 
 async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
@@ -21,6 +22,10 @@ async function getTanks() {
   return safeFetchJson<TanksResponse>('/v1/tanks?orgId=demo-org&page=1&pageSize=10&sortBy=createdAt&sortOrder=desc', {
     data: [],
   });
+  return safeFetchJson<TanksResponse>(
+    '/v1/tanks?orgId=demo-org&page=1&pageSize=10&sortBy=createdAt&sortOrder=desc',
+    { data: [] },
+  );
 }
 
 async function getStockingRisk() {
@@ -45,6 +50,8 @@ export default async function Page() {
     { date: 'Sun', no3: 9, po4: 0.16 },
   ];
 
+  const riskScore = risk.riskScore ?? 0;
+
   return (
     <div className="space-y-8">
       <section className="rounded-2xl border border-cyan-400/30 bg-gradient-to-r from-slate-900 via-cyan-950/30 to-slate-900 p-8">
@@ -54,6 +61,7 @@ export default async function Page() {
             <h2 className="mt-2 text-3xl font-semibold">Operations Dashboard</h2>
             <p className="mt-2 max-w-2xl text-sm text-slate-300">
               Multi-tenant monitoring for tanks, livestock health, water chemistry, and equipment telemetry.
+              Dashboard is fault-tolerant and remains available when API is temporarily unreachable.
             </p>
           </div>
           <div className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-xs text-slate-300">
@@ -116,6 +124,9 @@ export default async function Page() {
         <h3 className="mb-2 text-lg font-semibold">Stocking Risk Explanations</h3>
         <ul className="space-y-2 text-sm text-slate-300">
           {(risk.explanations ?? []).map((item) => (
+        <h3 className="mb-2 text-lg font-semibold">Stocking Risk Explanations</h3>
+        <ul className="space-y-2 text-sm text-slate-300">
+          {(risk.explanations ?? []).map((item: string) => (
             <li key={item} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
               {item}
             </li>

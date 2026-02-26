@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { ReactNode } from 'react';
 import { Providers } from '../components/providers';
 import './globals.css';
+import './globals.css';
+import { ReactNode } from 'react';
+import { Providers } from '../components/providers';
 
 const links = [
   ['Dashboard', '/'],
@@ -13,6 +16,7 @@ const links = [
   ['Organizations', '/organizations'],
   ['Analytics', '/analytics'],
 ] as const;
+];
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -27,6 +31,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <p className="text-xs text-slate-400">Production-grade aquarium operations platform</p>
                 </div>
                 <div className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">Demo Mode Active</div>
+                <div className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                  Demo Mode Active
+                </div>
               </div>
             </header>
 
@@ -36,12 +43,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <nav className="space-y-2 text-sm">
                   {links.map(([label, href]) => (
                     <Link
+                    <a
                       key={href}
                       href={href}
                       className="block rounded-lg border border-transparent px-3 py-2 text-slate-200 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
                     >
                       {label}
                     </Link>
+                    </a>
                   ))}
                 </nav>
               </aside>
