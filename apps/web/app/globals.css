@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  border-color: rgb(30 41 59 / 1);
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}
