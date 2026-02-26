@@ -1,0 +1,32 @@
+{
+  "name": "reefops-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "docker compose up --build",
+    "dev:local": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @reefops/web test:e2e",
+    "prepare": "husky",
+    "check:runtime": "node -e \"const major=parseInt(process.versions.node.split('.')[0],10); if(major<20){console.error('ReefOps requires Node.js >= 20. Current: '+process.version); process.exit(1)}\"",
+    "preinstall": "pnpm run check:runtime"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
